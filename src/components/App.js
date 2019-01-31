@@ -15,6 +15,71 @@ class App extends React.Component {
     }
   }
 
+  onChangeType = (e) => {
+    // console.log('e')
+    e.persist()
+    this.setState(
+        {
+          ...this.state,
+          filters: {
+            type: e.target.value
+        }
+      }
+    )
+  }
+
+  onAdoptPetHandler = (petObj) => {
+    // petObj.isAdopted = true
+    // this.setState(
+    //   {
+    //     pets: [...this.state.pets]
+    //
+    //   }
+    // )
+    let newPetsArr = this.state.pets.map(pet => {
+      if(pet.id === petObj.id){
+        return {...pet, isAdopted: true}
+      }
+      return pet
+    })
+    this.setState({pets: newPetsArr})
+  }
+
+  getPets = () => {
+    return fetch(`/api/${this.route()}`)
+    .then(r => r.json())
+    .then(petsArr => this.setState(
+      {
+        // ...this.state,
+        pets: petsArr
+      }
+    ))
+  }
+
+  // getPets = () => {
+  //   filter = this.state.filters.type
+  //   return (filter === 'all' ? `fetch(`/api/${this.route()}`)`: `fetch(`/api/pets?type=${filter}`)`)
+  //   .then(r => r.json())
+  //   .then(petsArr => this.setState(
+  //     {
+  //       // ...this.state,
+  //       pets: petsArr
+  //     }
+  //   ))
+  // }
+
+
+  onFindPetsClick = (e) => {
+    console.log(this.getPets())
+    e.persist()
+    // this.getPets()
+  }
+
+  route = (props) => {
+    let filter = this.state.filters.type
+    return (filter === 'all' ? 'pets' : `pets?type=${filter}`)
+  }
+
   render() {
     return (
       <div className="ui container">
@@ -24,10 +89,18 @@ class App extends React.Component {
         <div className="ui container">
           <div className="ui grid">
             <div className="four wide column">
-              <Filters />
+              <Filters
+                selectedFilter = {this.state.filters.type}
+                onChangeType={this.onChangeType}
+                onFindPetsClick = {this.onFindPetsClick}
+                >
+              </Filters>
             </div>
             <div className="twelve wide column">
-              <PetBrowser />
+              <PetBrowser
+                pets={this.state.pets}
+                onAdoptPet={this.onAdoptPetHandler}
+              />
             </div>
           </div>
         </div>
